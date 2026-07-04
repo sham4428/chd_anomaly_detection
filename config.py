@@ -1,13 +1,20 @@
-# 数据集路径配置（请修改为你本地的实际路径）
-PTBXL_PATH = "D:\chd_anomaly_detection\data\ptbxl"                    # PTB-XL根目录
-CIRCOR_PATH = "D:\chd_anomaly_detection\data\circor"        # Circor心音数据集根目录
-CHD_CXR_PATH = "D:\chd_anomaly_detection\data\chd_xray" # Kaggle CHD胸片数据集根目录
+import os
+from pathlib import Path
 
-# 预处理输出目录
-OUTPUT_DIR = "./data"
 
-# 训练参数
-BATCH_SIZE = 32
-EPOCHS = 50
-LEARNING_RATE = 1e-4
-DEVICE = "cuda"  # 或 "cpu"
+BASE_DIR = Path(__file__).resolve().parent
+DATA_ROOT = Path(os.getenv("CHD_DATA_ROOT", BASE_DIR / "data"))
+
+# Dataset paths. Environment variables can override the local defaults.
+PTBXL_PATH = str(Path(os.getenv("PTBXL_PATH", DATA_ROOT / "ptbxl")))
+CIRCOR_PATH = str(Path(os.getenv("CIRCOR_PATH", DATA_ROOT / "circor")))
+CHD_CXR_PATH = str(Path(os.getenv("CHD_CXR_PATH", DATA_ROOT / "chd_xray")))
+
+# Preprocessing output directory.
+OUTPUT_DIR = str(Path(os.getenv("CHD_OUTPUT_DIR", BASE_DIR / "data")))
+
+# Training parameters.
+BATCH_SIZE = int(os.getenv("CHD_BATCH_SIZE", "32"))
+EPOCHS = int(os.getenv("CHD_EPOCHS", "50"))
+LEARNING_RATE = float(os.getenv("CHD_LEARNING_RATE", "1e-4"))
+DEVICE = os.getenv("CHD_DEVICE", "cuda")
