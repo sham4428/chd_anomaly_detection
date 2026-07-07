@@ -1,0 +1,13 @@
+services:
+  - type: web
+    name: chd-anomaly-detection
+    runtime: python
+    plan: free
+    buildCommand: pip install --upgrade pip && pip install -r requirements-deploy.txt
+    startCommand: gunicorn app:app --bind 0.0.0.0:$PORT --workers 1 --threads 2 --timeout 180
+    healthCheckPath: /api/health
+    envVars:
+      - key: PYTHON_VERSION
+        value: 3.11.9
+      - key: CHD_DEVICE
+        value: cpu
