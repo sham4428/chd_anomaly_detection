@@ -8,6 +8,16 @@
 
 系统使用正常样本训练自编码器，通过重构误差（MSE）与阈值比较来判断样本是否存在异常。当前项目适合科研原型、课程展示和工程演示，不应作为临床诊断依据。
 
+## 云端部署
+
+仓库已包含 Render 部署配置：
+
+- `render.yaml`
+- `requirements-deploy.txt`
+- `DEPLOY.md`
+
+部署步骤和 curl 测试命令见 [DEPLOY.md](DEPLOY.md)。
+
 ## 项目结构
 
 ```text
