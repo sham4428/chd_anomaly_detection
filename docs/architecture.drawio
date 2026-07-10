@@ -1,0 +1,64 @@
+<mxfile host="app.diagrams.net" modified="2026-07-08T00:00:00.000Z" agent="Codex" version="24.7.17">
+  <diagram id="chd-architecture" name="CHD Architecture">
+    <mxGraphModel dx="1422" dy="794" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1400" pageHeight="900" math="0" shadow="0">
+      <root>
+        <mxCell id="0" />
+        <mxCell id="1" parent="0" />
+        <mxCell id="input" value="Inputs&#xa;ECG .hea/.dat&#xa;PCG audio&#xa;CXR image" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#E0F2FE;strokeColor=#0284C7;fontSize=16;fontStyle=1;spacing=12;" vertex="1" parent="1">
+          <mxGeometry x="40" y="130" width="190" height="130" as="geometry" />
+        </mxCell>
+        <mxCell id="preprocess" value="Preprocessing&#xa;ECG normalization&#xa;MFCC extraction&#xa;CXR resize/normalize" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ECFDF5;strokeColor=#059669;fontSize=16;fontStyle=1;spacing=12;" vertex="1" parent="1">
+          <mxGeometry x="300" y="130" width="230" height="130" as="geometry" />
+        </mxCell>
+        <mxCell id="models" value="Single-Modality Autoencoders&#xa;ECG AE&#xa;PCG AE&#xa;CXR AE" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FEF3C7;strokeColor=#D97706;fontSize=16;fontStyle=1;spacing=12;" vertex="1" parent="1">
+          <mxGeometry x="600" y="130" width="240" height="130" as="geometry" />
+        </mxCell>
+        <mxCell id="scores" value="Anomaly Scores&#xa;MSE / threshold&#xa;risk level per modality" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FCE7F3;strokeColor=#DB2777;fontSize=16;fontStyle=1;spacing=12;" vertex="1" parent="1">
+          <mxGeometry x="910" y="130" width="220" height="130" as="geometry" />
+        </mxCell>
+        <mxCell id="fusion" value="Weighted Late Fusion&#xa;available modality weights&#xa;fusion score&#xa;confidence" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#EDE9FE;strokeColor=#7C3AED;fontSize=16;fontStyle=1;spacing=12;" vertex="1" parent="1">
+          <mxGeometry x="1200" y="130" width="220" height="130" as="geometry" />
+        </mxCell>
+        <mxCell id="api" value="Flask API&#xa;/api/predict/*&#xa;/api/predict/multimodal" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#EEF2FF;strokeColor=#4F46E5;fontSize=16;fontStyle=1;spacing=12;" vertex="1" parent="1">
+          <mxGeometry x="600" y="380" width="240" height="110" as="geometry" />
+        </mxCell>
+        <mxCell id="frontend" value="Streamlit Frontend&#xa;Upload files&#xa;Call API&#xa;Display results" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#F8FAFC;strokeColor=#475569;fontSize=16;fontStyle=1;spacing=12;" vertex="1" parent="1">
+          <mxGeometry x="910" y="380" width="220" height="110" as="geometry" />
+        </mxCell>
+        <mxCell id="train" value="Training Pipeline&#xa;normal_ecg.npy&#xa;normal_pcg.npy&#xa;normal_cxr.npy" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#F0FDFA;strokeColor=#0F766E;fontSize=16;fontStyle=1;spacing=12;" vertex="1" parent="1">
+          <mxGeometry x="300" y="570" width="230" height="120" as="geometry" />
+        </mxCell>
+        <mxCell id="thresholds" value="Calibration / Test&#xa;thresholds.npz&#xa;held-out metrics" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FFF7ED;strokeColor=#EA580C;fontSize=16;fontStyle=1;spacing=12;" vertex="1" parent="1">
+          <mxGeometry x="600" y="570" width="240" height="120" as="geometry" />
+        </mxCell>
+        <mxCell id="edge1" edge="1" parent="1" source="input" target="preprocess" style="endArrow=block;html=1;strokeWidth=2;strokeColor=#334155;">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="edge2" edge="1" parent="1" source="preprocess" target="models" style="endArrow=block;html=1;strokeWidth=2;strokeColor=#334155;">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="edge3" edge="1" parent="1" source="models" target="scores" style="endArrow=block;html=1;strokeWidth=2;strokeColor=#334155;">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="edge4" edge="1" parent="1" source="scores" target="fusion" style="endArrow=block;html=1;strokeWidth=2;strokeColor=#334155;">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="edge5" edge="1" parent="1" source="fusion" target="api" style="endArrow=block;html=1;strokeWidth=2;strokeColor=#334155;edgeStyle=orthogonalEdgeStyle;">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="edge6" edge="1" parent="1" source="api" target="frontend" style="endArrow=block;html=1;strokeWidth=2;strokeColor=#334155;">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="edge7" edge="1" parent="1" source="train" target="models" style="endArrow=block;html=1;strokeWidth=2;strokeColor=#0F766E;edgeStyle=orthogonalEdgeStyle;">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="edge8" edge="1" parent="1" source="train" target="thresholds" style="endArrow=block;html=1;strokeWidth=2;strokeColor=#EA580C;">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="edge9" edge="1" parent="1" source="thresholds" target="scores" style="endArrow=block;html=1;strokeWidth=2;strokeColor=#EA580C;edgeStyle=orthogonalEdgeStyle;">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+      </root>
+    </mxGraphModel>
+  </diagram>
+</mxfile>

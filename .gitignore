@@ -1,0 +1,30 @@
+﻿# Python caches
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.mypy_cache/
+
+# IDE and OS files
+.idea/
+.vscode/
+.DS_Store
+Thumbs.db
+
+# Local data and generated outputs
+data/
+abnormal_samples_test/
+reports/
+chd_lots_test/
+chd_lots_test_small/
+*_upload/
+*.log
+
+# Secrets and local environment
+.env
+.env.*
+.venv/
+venv/
+
+# Temporary notebooks / exports
+.ipynb_checkpoints/
+.git.broken-*/

@@ -1,0 +1,99 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1280" height="620" viewBox="0 0 1280 620" role="img" aria-label="CHD multimodal anomaly detection system architecture">
+  <defs>
+    <style>
+      .title { font: 700 24px Arial, sans-serif; fill: #0f172a; }
+      .box-title { font: 700 18px Arial, sans-serif; fill: #0f172a; }
+      .box-text { font: 14px Arial, sans-serif; fill: #334155; }
+      .arrow { stroke: #334155; stroke-width: 2.5; fill: none; marker-end: url(#arrow); }
+      .arrow-train { stroke: #0f766e; stroke-width: 2.5; fill: none; marker-end: url(#arrowTrain); }
+      .arrow-threshold { stroke: #ea580c; stroke-width: 2.5; fill: none; marker-end: url(#arrowThreshold); }
+    </style>
+    <marker id="arrow" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="8" markerHeight="8" orient="auto-start-reverse">
+      <path d="M 0 0 L 10 5 L 0 10 z" fill="#334155"/>
+    </marker>
+    <marker id="arrowTrain" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="8" markerHeight="8" orient="auto-start-reverse">
+      <path d="M 0 0 L 10 5 L 0 10 z" fill="#0f766e"/>
+    </marker>
+    <marker id="arrowThreshold" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="8" markerHeight="8" orient="auto-start-reverse">
+      <path d="M 0 0 L 10 5 L 0 10 z" fill="#ea580c"/>
+    </marker>
+  </defs>
+  <rect width="1280" height="620" fill="#f8fafc"/>
+  <text x="40" y="48" class="title">CHD Multimodal Anomaly Detection Architecture</text>
+
+  <g transform="translate(40,95)">
+    <rect width="180" height="120" rx="14" fill="#e0f2fe" stroke="#0284c7" stroke-width="2"/>
+    <text x="18" y="32" class="box-title">Inputs</text>
+    <text x="18" y="62" class="box-text">ECG .hea/.dat</text>
+    <text x="18" y="84" class="box-text">PCG audio</text>
+    <text x="18" y="106" class="box-text">CXR image</text>
+  </g>
+
+  <g transform="translate(280,95)">
+    <rect width="220" height="120" rx="14" fill="#ecfdf5" stroke="#059669" stroke-width="2"/>
+    <text x="18" y="32" class="box-title">Preprocessing</text>
+    <text x="18" y="62" class="box-text">ECG normalization</text>
+    <text x="18" y="84" class="box-text">MFCC extraction</text>
+    <text x="18" y="106" class="box-text">CXR resize/normalize</text>
+  </g>
+
+  <g transform="translate(560,95)">
+    <rect width="220" height="120" rx="14" fill="#fef3c7" stroke="#d97706" stroke-width="2"/>
+    <text x="18" y="32" class="box-title">Autoencoders</text>
+    <text x="18" y="62" class="box-text">ECG AE</text>
+    <text x="18" y="84" class="box-text">PCG AE</text>
+    <text x="18" y="106" class="box-text">CXR AE</text>
+  </g>
+
+  <g transform="translate(840,95)">
+    <rect width="210" height="120" rx="14" fill="#fce7f3" stroke="#db2777" stroke-width="2"/>
+    <text x="18" y="32" class="box-title">Anomaly Scores</text>
+    <text x="18" y="62" class="box-text">MSE / threshold</text>
+    <text x="18" y="84" class="box-text">Risk per modality</text>
+  </g>
+
+  <g transform="translate(1110,95)">
+    <rect width="210" height="120" rx="14" fill="#ede9fe" stroke="#7c3aed" stroke-width="2"/>
+    <text x="18" y="32" class="box-title">Late Fusion</text>
+    <text x="18" y="62" class="box-text">Weighted score</text>
+    <text x="18" y="84" class="box-text">Risk level</text>
+    <text x="18" y="106" class="box-text">Confidence</text>
+  </g>
+
+  <g transform="translate(560,330)">
+    <rect width="220" height="105" rx="14" fill="#eef2ff" stroke="#4f46e5" stroke-width="2"/>
+    <text x="18" y="32" class="box-title">Flask API</text>
+    <text x="18" y="62" class="box-text">/api/predict/*</text>
+    <text x="18" y="84" class="box-text">/api/predict/multimodal</text>
+  </g>
+
+  <g transform="translate(840,330)">
+    <rect width="210" height="105" rx="14" fill="#ffffff" stroke="#64748b" stroke-width="2"/>
+    <text x="18" y="32" class="box-title">Streamlit UI</text>
+    <text x="18" y="62" class="box-text">Upload files</text>
+    <text x="18" y="84" class="box-text">Display results</text>
+  </g>
+
+  <g transform="translate(280,480)">
+    <rect width="220" height="105" rx="14" fill="#f0fdfa" stroke="#0f766e" stroke-width="2"/>
+    <text x="18" y="32" class="box-title">Training</text>
+    <text x="18" y="62" class="box-text">normal_ecg.npy</text>
+    <text x="18" y="84" class="box-text">normal_pcg / normal_cxr</text>
+  </g>
+
+  <g transform="translate(560,480)">
+    <rect width="220" height="105" rx="14" fill="#fff7ed" stroke="#ea580c" stroke-width="2"/>
+    <text x="18" y="32" class="box-title">Calibration / Test</text>
+    <text x="18" y="62" class="box-text">thresholds.npz</text>
+    <text x="18" y="84" class="box-text">held-out metrics</text>
+  </g>
+
+  <path class="arrow" d="M 220 155 L 280 155"/>
+  <path class="arrow" d="M 500 155 L 560 155"/>
+  <path class="arrow" d="M 780 155 L 840 155"/>
+  <path class="arrow" d="M 1050 155 L 1110 155"/>
+  <path class="arrow" d="M 1215 215 L 1215 382 L 780 382"/>
+  <path class="arrow" d="M 780 382 L 840 382"/>
+  <path class="arrow-train" d="M 500 532 L 670 532 L 670 215"/>
+  <path class="arrow-threshold" d="M 780 532 L 945 532 L 945 215"/>
+</svg>
