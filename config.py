@@ -18,3 +18,18 @@ BATCH_SIZE = int(os.getenv("CHD_BATCH_SIZE", "32"))
 EPOCHS = int(os.getenv("CHD_EPOCHS", "50"))
 LEARNING_RATE = float(os.getenv("CHD_LEARNING_RATE", "1e-4"))
 DEVICE = os.getenv("CHD_DEVICE", "cuda")
+
+# RAG knowledge base configuration.
+KNOWLEDGE_PDF_DIR = str(
+    Path(os.getenv("CHD_KNOWLEDGE_PDF_DIR", BASE_DIR / "knowledge_base" / "pdfs"))
+)
+KNOWLEDGE_PERSIST_DIR = str(
+    Path(os.getenv("CHD_KNOWLEDGE_PERSIST_DIR", BASE_DIR / "chroma_db"))
+)
+KNOWLEDGE_COLLECTION_NAME = os.getenv(
+    "CHD_KNOWLEDGE_COLLECTION_NAME", "chd_clinical_guidance"
+)
+KNOWLEDGE_EMBEDDING_MODEL = os.getenv(
+    "CHD_RAG_EMBEDDING_MODEL", "all-MiniLM-L6-v2"
+)
+KNOWLEDGE_TOP_K = int(os.getenv("CHD_RAG_TOP_K", "3"))

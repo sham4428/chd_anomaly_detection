@@ -76,6 +76,45 @@ pip install -r requirements.txt
 
 `requirements.txt` 包含训练、评估、API 和 Streamlit 前端依赖。`requirements-deploy.txt` 只包含云端 Flask API 依赖。
 
+### 1.1 构建 RAG 临床知识库
+
+将 CHD 相关 PDF 放到一个独立目录，建议使用英文指南、综述或规范，例如：
+
+```text
+knowledge_base/
+`-- pdfs/
+    |-- CHD_Clinical_Guidelines_2024.pdf
+    `-- Pediatric_Cardiology_Review.pdf
+```
+
+构建知识库：
+
+```powershell
+python build_knowledge_base.py .\knowledge_base\pdfs
+```
+
+默认会把向量库持久化到 `.\chroma_db`。如果本地向量库已存在，脚本会直接加载；如果需要强制重建：
+
+```powershell
+python build_knowledge_base.py .\knowledge_base\pdfs --force-rebuild
+```
+
+首次构建时，`sentence-transformers` 会在本地下载 `all-MiniLM-L6-v2` 模型；后续会复用本地缓存，不需要额外 API。
+
+验证检索是否正常：
+
+```powershell
+python -c "from rag_knowledge_base import init_knowledge_base, query_knowledge_base; init_knowledge_base(r'.\knowledge_base\pdfs', r'.\chroma_db'); print(query_knowledge_base('congenital heart disease echocardiography referral', top_k=2))"
+```
+
+相关环境变量：
+
+- `CHD_KNOWLEDGE_PDF_DIR`：PDF 目录
+- `CHD_KNOWLEDGE_PERSIST_DIR`：Chroma 持久化目录
+- `CHD_KNOWLEDGE_COLLECTION_NAME`：向量集合名称
+- `CHD_RAG_EMBEDDING_MODEL`：本地 embedding 模型，默认 `all-MiniLM-L6-v2`
+- `CHD_RAG_TOP_K`：默认检索条数，默认 `3`
+
 ### 2. 启动 API
 
 ```powershell
@@ -90,6 +129,7 @@ curl.exe http://127.0.0.1:7860/api/version
 ```
 
 模型采用延迟加载：服务启动时不会立刻读取权重，第一次预测时才加载。
+RAG 知识库会在应用启动时尝试初始化。如果 `CHD_KNOWLEDGE_PDF_DIR` 不存在，API 会记录 warning，但核心检测接口仍可正常使用。
 
 ### 3. 启动前端
 
@@ -187,12 +227,33 @@ curl -X POST http://127.0.0.1:7860/api/predict/multimodal \
 
 ```json
 {
+  "fusion_score": 1.72,
+  "fusion_risk_level": "high",
+  "clinical_guidance": [
+    {
+      "content": "High-risk congenital heart disease screening findings should be followed by echocardiography and specialist review.",
+      "source": "CHD_Clinical_Guidelines_2024.pdf"
+    },
+    {
+      "content": "Prompt referral to pediatric cardiology is recommended when structural disease is suspected.",
+      "source": "Pediatric_Cardiology_Review.pdf"
+    }
+  ],
+  "individual_results": [
+    {
+      "modality": "ECG",
+      "mse": 0.142,
+      "threshold": 0.12,
+      "score": 1.18,
+      "is_abnormal": true
+    }
+  ],
   "fusion": {
     "available_modalities": ["ECG", "PCG", "CXR"],
     "missing_modalities": [],
     "confidence": 1.0,
-    "fusion_score": 1.27,
-    "risk_level": "elevated",
+    "fusion_score": 1.72,
+    "risk_level": "high",
     "is_abnormal": true
   },
   "results": [
@@ -208,6 +269,7 @@ curl -X POST http://127.0.0.1:7860/api/predict/multimodal \
 ```
 
 `confidence` 表示已提供模态对应的原始权重之和，不是统计学置信度。例如只提供 ECG 和 PCG 时，`confidence = 0.8`。
+当 `fusion_risk_level == "high"` 时，接口会尝试从本地 CHD PDF 知识库检索 `clinical_guidance`；如果知识库未构建、目录缺失或检索失败，该字段会返回空列表，不影响原有融合结果。
 
 统一错误响应：
 
@@ -235,6 +297,8 @@ curl -X POST http://127.0.0.1:7860/api/predict/multimodal \
 | `inference.py` | 本地命令行推理 |
 | `export_onnx.py` | ONNX 与阈值导出 |
 | `prepare_upload.py` | 创建安全、精简的上传副本 |
+| `rag_knowledge_base.py` | PDF 加载、分块、向量化与检索 |
+| `build_knowledge_base.py` | 本地构建或加载 Chroma 知识库 |
 | `PROJECT_INDEX.md` | 完整文件分级索引 |
 | `DEPLOY.md` | Render / EC2 部署说明 |
 

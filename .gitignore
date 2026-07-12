@@ -18,6 +18,7 @@ chd_lots_test/
 chd_lots_test_small/
 *_upload/
 *.log
+chroma_db/
 
 # Secrets and local environment
 .env

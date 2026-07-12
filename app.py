@@ -9,7 +9,19 @@ import torch
 from flask import Flask, jsonify, request
 from flask_cors import CORS
 
+from config import (
+    KNOWLEDGE_COLLECTION_NAME,
+    KNOWLEDGE_EMBEDDING_MODEL,
+    KNOWLEDGE_PDF_DIR,
+    KNOWLEDGE_PERSIST_DIR,
+    KNOWLEDGE_TOP_K,
+)
 from model import CXRAutoencoder, ECGAutoencoder, PCGAutoencoder, load_autoencoder
+from rag_knowledge_base import (
+    get_knowledge_base_status,
+    init_knowledge_base,
+    query_knowledge_base,
+)
 
 
 app = Flask(__name__)
@@ -43,6 +55,11 @@ ALLOW_LOCAL_ECG_PATHS = os.getenv("ALLOW_LOCAL_ECG_PATHS", "false").lower() in {
 LOCAL_ECG_ROOT = Path(
     os.getenv("LOCAL_ECG_ROOT", Path(__file__).resolve().parent / "data")
 ).resolve()
+CLINICAL_GUIDANCE_QUERY = os.getenv(
+    "CHD_CLINICAL_GUIDANCE_QUERY",
+    "congenital heart disease clinical guidelines high risk recommendations "
+    "echocardiography pediatric cardiology referral follow-up",
+)
 
 
 def risk_level(score):
@@ -135,6 +152,55 @@ def fuse_results(results):
 
 def allowed_extension(filename, allowed_extensions):
     return Path(filename or "").suffix.lower() in allowed_extensions
+
+
+def initialize_knowledge_base():
+    pdf_dir = Path(KNOWLEDGE_PDF_DIR)
+    if not pdf_dir.exists():
+        logger.warning(
+            "Knowledge base PDF directory does not exist: %s. Clinical guidance retrieval is disabled.",
+            pdf_dir,
+        )
+        return
+
+    try:
+        stats = init_knowledge_base(
+            pdf_directory=pdf_dir,
+            persist_dir=KNOWLEDGE_PERSIST_DIR,
+            embedding_model_name=KNOWLEDGE_EMBEDDING_MODEL,
+            collection_name=KNOWLEDGE_COLLECTION_NAME,
+        )
+        logger.info(
+            "Knowledge base %s with %s vectors from %s PDFs.",
+            stats["status"],
+            stats["vector_count"],
+            stats["pdf_count"],
+        )
+    except Exception:
+        logger.exception(
+            "Knowledge base initialization failed. Core anomaly detection will continue without RAG."
+        )
+
+
+def build_clinical_guidance(fusion_result, modality_results):
+    if fusion_result.get("risk_level") != "high":
+        return []
+
+    kb_status = get_knowledge_base_status()
+    if not kb_status.get("ready"):
+        return []
+
+    abnormal_modalities = [
+        item["modality"] for item in modality_results if item.get("is_abnormal")
+    ]
+    modality_hint = ", ".join(abnormal_modalities) if abnormal_modalities else "multimodal"
+    query = f"{CLINICAL_GUIDANCE_QUERY} abnormal modalities {modality_hint}"
+
+    try:
+        return query_knowledge_base(query, top_k=KNOWLEDGE_TOP_K)
+    except Exception:
+        logger.exception("Clinical guidance retrieval failed")
+        return []
 
 
 class CHDDetector:
@@ -252,6 +318,7 @@ class CHDDetector:
 
 detector = None
 detector_error = None
+initialize_knowledge_base()
 
 
 def get_detector():
@@ -345,6 +412,7 @@ def health_check():
             "models_loaded": detector is not None,
             "model_error": "Model loading failed; see server logs." if detector_error else None,
             "model_architectures": detector.model_architectures if detector else None,
+            "knowledge_base": get_knowledge_base_status(),
             "disclaimer": DISCLAIMER,
         }
     )
@@ -359,6 +427,7 @@ def version():
             "threshold_version": THRESHOLD_VERSION,
             "fusion_weights": FUSION_WEIGHTS,
             "model_architectures": detector.model_architectures if detector else None,
+            "knowledge_base": get_knowledge_base_status(),
             "disclaimer": DISCLAIMER,
         }
     )
@@ -466,7 +535,18 @@ def predict_multimodal():
         if not results:
             return error_response("INVALID_INPUT", "No analyzable ECG, PCG, or CXR data was provided.")
 
-        return jsonify({"fusion": fuse_results(results), "results": results})
+        fusion_result = fuse_results(results)
+        clinical_guidance = build_clinical_guidance(fusion_result, results)
+        return jsonify(
+            {
+                "fusion": fusion_result,
+                "results": results,
+                "fusion_score": fusion_result["fusion_score"],
+                "fusion_risk_level": fusion_result["risk_level"],
+                "individual_results": results,
+                "clinical_guidance": clinical_guidance,
+            }
+        )
     except ValueError as exc:
         return error_response("INVALID_INPUT", str(exc), 400)
     except RuntimeError as exc:
