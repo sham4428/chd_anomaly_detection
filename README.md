@@ -2,7 +2,7 @@
 
 # CHD 多模态异常检测
 
-基于 ECG、PCG 与胸部 X 光片的冠心病筛查研究原型
+基于 ECG、PCG 与胸部 X 光片的先天性心脏病病筛查研究原型
 
 `PyTorch` · `Flask` · `Streamlit` · `Late Fusion`
 
